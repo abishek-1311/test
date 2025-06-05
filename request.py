@@ -1,6 +1,6 @@
 import requests
 
-BASE_URL = "http://127.0.0.1:8003"
+BASE_URL = "http://127.0.0.1:8073" 
 
 def get_root():
     response = requests.get(f"{BASE_URL}/")
@@ -23,7 +23,7 @@ def create_booking():
     print(response.json())
 
 def get_all_bookings():
-    response = requests.get(f"{BASE_URL}/bookings/")
+    response = requests.get(f"{BASE_URL}/bookings/get-all/")
     print("GET /bookings/ Response:")
     print(response.json())
 
@@ -38,19 +38,39 @@ def get_booking_by_id():
 
 def update_booking():
     booking_id = input("Enter booking ID: ")
-    customer_name = input("Enter updated customer name: ")
-    vehicle_number = input("Enter updated vehicle number: ")
-    service_type = input("Enter updated service type: ")
-    booking_date = input("Enter updated booking date (YYYY-MM-DD): ")
-    payload = {
-        "customer_name": customer_name,
-        "vehicle_number": vehicle_number,
-        "service_type": service_type,
-        "booking_date": booking_date
-    }
+    print("Leave a field blank if you don't want to update it.")
+    
+    # Prompt the user for updates
+    customer_name = input("Enter updated customer name: ").strip()
+    vehicle_name = input("Enter updated vehicle number: ").strip()
+    service_type = input("Enter updated service type: ").strip()
+    booking_date = input("Enter updated booking date (YYYY-MM-DD): ").strip()
+    
+    # Dynamically construct the payload with only non-empty fields
+    payload = {}
+    if customer_name:
+        payload["customer_name"] = customer_name
+    if vehicle_name:
+        payload["vehicle_name"] = vehicle_name
+    if service_type:
+        payload["service_type"] = service_type
+    if booking_date:
+        payload["booking_date"] = booking_date
+
+    # Check if there's anything to update
+    if not payload:
+        print("No fields to update. Exiting.")
+        return
+
+    # Send the PUT request with the partial payload
     response = requests.put(f"{BASE_URL}/bookings/{booking_id}", json=payload)
     print(f"PUT /bookings/{booking_id} Response:")
-    print(response.json())
+    
+    # Handle the response
+    if response.status_code == 200:
+        print("Booking updated successfully:", response.json())
+    else:
+        print("Error updating booking:", response.json())
 
 def delete_booking():
     booking_id = input("Enter booking ID to delete: ")
